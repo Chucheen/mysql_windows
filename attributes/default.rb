@@ -1,0 +1,1 @@
+default[:mysql_windows][:lwrp][:remove_completely] = false
