@@ -4,6 +4,12 @@
 # Bundler
 bin/*
 .bundle/*
-
 .kitchen/
 .kitchen.local.yml
+/cookbooks/
+.chef/*
+environments/
+nodes/
+site-cookbooks/
+roles/
+
