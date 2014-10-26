@@ -12,4 +12,5 @@ environments/
 nodes/
 site-cookbooks/
 roles/
+resources/user.rb
 

@@ -25,14 +25,4 @@ attribute :root_password, kind_of: String,  callbacks: {
 	}
 }
 
-#attribute :user_name, kind_of: String, callbacks: {
-#	"Should have a length of 4 characters at least" => lambda { |username|
-#		username.length >= 4
-#	}
-#}
-#
-#attribute :user_password, kind_of: String, callbacks: {
-#	"Should have a length of 6 characters at least" => lambda { |password|
-#		password.length >= 6
-#	}
-#}
+attribute :remove_completely, kind_of: [ TrueClass, FalseClass ], default: false

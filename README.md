@@ -15,23 +15,6 @@ Requirements
 
 
 
-Attributes
-----------
-<table>
-  <tr>
-    <th>Key</th>
-    <th>Type</th>
-    <th>Description</th>
-    <th>Default</th>
-  </tr>
-  <tr>
-    <td><tt>[:mysql_windows][:lwrp][:remove_completely]</tt></td>
-    <td>Boolean</td>
-    <td>Used only for uninstall action from service resource. It defines if data folder is going to be erased too</td>
-    <td><tt>true</tt></td>
-  </tr>
-</table>
-
 ## Resource/Provider
 
 ## mysql\_windows\_service
