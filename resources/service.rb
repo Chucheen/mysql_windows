@@ -26,3 +26,5 @@ attribute :root_password, kind_of: String,  callbacks: {
 }
 
 attribute :remove_completely, kind_of: [ TrueClass, FalseClass ], default: false
+
+attr_accessor :installed_already

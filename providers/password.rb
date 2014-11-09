@@ -36,7 +36,6 @@ def load_current_resource
   @current_resource.user_pass(new_resource.user_pass)
   @current_resource.installation_path(new_resource.installation_path)
   @current_resource.updated_already = password_is_updated
-
 end
 
 private
