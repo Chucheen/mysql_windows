@@ -8,26 +8,31 @@ module InstallationCheck
     access = Win32::Registry::KEY_ALL_ACCESS|0x100
     program_exists = false
     keynames.each do |keyname|
-      Win32::Registry::HKEY_LOCAL_MACHINE.open(keyname, access) do |reg_keys|
-        reg_keys.each_key do |key, value|
+      # Begin without rescue to avoid finishing when Software\Wow6432Node\ doesn't exist
+      begin
+        Win32::Registry::HKEY_LOCAL_MACHINE.open(keyname, access) do |reg_keys|
+          reg_keys.each_key do |key, value|
 
-          keyname_install = "#{keyname}\\#{key}"
-          Win32::Registry::HKEY_LOCAL_MACHINE.open(keyname_install, access) do |reg|
-            begin
-              display_name = reg['displayname', Win32::Registry::REG_SZ]
-              case letter_case
-              when :upper
-                display_name.upcase!
-              when :lower
-                display_name.downcase!
+            keyname_install = "#{keyname}\\#{key}"
+            Win32::Registry::HKEY_LOCAL_MACHINE.open(keyname_install, access) do |reg|
+              begin
+                display_name = reg['displayname', Win32::Registry::REG_SZ]
+                case letter_case
+                when :upper
+                  display_name.upcase!
+                when :lower
+                  display_name.downcase!
+                end
+                program_exists = true and break if display_name.include? program_name
+              rescue
+                # Nothing to do here
               end
-              program_exists = true and break if display_name.include? program_name
-            rescue
-              # Nothing to do here
             end
           end
-        end
-      end  
+        end  
+      rescue
+        # Nothing to do here
+      end
     end
     program_exists
   end

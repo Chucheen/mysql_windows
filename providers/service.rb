@@ -37,10 +37,18 @@ action :install do
       action :add
     end
 
+    template "#{installation_path}\\my.ini" do
+      source 'my.ini.erb'
+      cookbook 'mysql_windows'
+      variables({
+        installation_path: installation_path
+        })
+    end
+
     windows_batch "Installing Service" do
       code <<-EOH
         set MYSQL_PATH="#{installation_path}"
-        call %MYSQL_PATH%\\bin\\mysqld-nt.exe --install MySQL
+        call %MYSQL_PATH%\\bin\\mysqld-nt.exe --install MySQL --defaults-file="#{installation_path}\\my.ini
       EOH
     end
 
@@ -52,34 +60,35 @@ action :install do
       action :enable
     end
 
-    ruby_block "Changing password for root" do
-      block do
-        command_response = Mixlib::ShellOut.new("\"#{installation_path}\\bin\\mysql.exe\" -u root --execute \"exit\"")
-        command_response.run_command
-        if !(command_response.stderr.include?('ERROR 1045'))
-          # In order to allow the service to completely start and then change the passowrd
-          # 
-          sleep 30
-          change_pass_str = "\"#{installation_path}\\bin\\mysql.exe\" -u root --execute \"UPDATE mysql.user SET Password=PASSWORD('#{root_password}') WHERE User='root';FLUSH PRIVILEGES;\""
-          command_response = Mixlib::ShellOut.new(change_pass_str)
+    if !root_password.nil?
+      ruby_block "Changing password for root" do
+        block do
+          command_response = Mixlib::ShellOut.new("\"#{installation_path}\\bin\\mysql.exe\" -u root --execute \"exit\"")
           command_response.run_command
-          if(command_response.stderr.length > 0)
-            raise ArgumentError, "An error ocurred trying to set the password. STDERR: #{command_response.stderr}"
+          if !(command_response.stderr.include?('ERROR 1045'))
+            # In order to allow the service to completely start and then change the passowrd
+            # 
+            sleep 30
+            change_pass_str = "\"#{installation_path}\\bin\\mysql.exe\" -u root --execute \"UPDATE mysql.user SET Password=PASSWORD('#{root_password}') WHERE User='root';FLUSH PRIVILEGES;\""
+            command_response = Mixlib::ShellOut.new(change_pass_str)
+            command_response.run_command
+            if(command_response.stderr.length > 0)
+              raise ArgumentError, "An error ocurred trying to set the password. STDERR: #{command_response.stderr}"
+            end
+            puts "\nPassword has been set!"
+            Chef::Log.info("Password has been set!");
+            
+          else
+            puts "\nPassword wasn't changed since root already have a password defined. Maybe there's still data from a previous installation."
+            Chef::Log.info("Password wasn't changed since root already have a passwod defined. Maybe there's still data from a previous installation.");
           end
-          puts "\nPassword has been set!"
-          Chef::Log.info("Password has been set!");
-          
-        else
-          puts "\nPassword wasn't changed since root already have a password defined. Maybe there's still data from a previous installation."
-          Chef::Log.info("Password wasn't changed since root already have a passwod defined. Maybe there's still data from a previous installation.");
-        end
 
-        # This command is put in order to set exit status to 0 if mysql throwed 1, as in resources executed after this
-        # may get the exit status as theirs. This has happened with subversion resources.
-        #`dir`
-        
+          # This command is put in order to set exit status to 0 if mysql throwed 1, as in resources executed after this
+          # may get the exit status as theirs. This has happened with subversion resources.
+          #`dir`
+          
+        end
       end
-      not_if {root_password.nil?}
     end
 
     new_resource.updated_by_last_action(true)
